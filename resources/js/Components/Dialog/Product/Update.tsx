@@ -1,13 +1,14 @@
 import { Button } from "@/Components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/Components/ui/dialog";
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/Components/ui/alert-dialog"
 import {
     Select,
     SelectContent,
@@ -20,7 +21,7 @@ import {
 import { Input } from "@/Components/ui/input";
 import { useForm } from "@inertiajs/react";
 import { Textarea } from "@/Components/ui/textarea";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import LoadingButton from "@/Components/ui/LoadingButton";
 import { toast } from "sonner";
 import { getDescription } from '@/helpers/helpers';
@@ -30,28 +31,56 @@ type Category = {
     name: string;
 };
 
-type PageCreateProduct = {
+type PageUpdateProduct = {
     categories: Category[];
+    id: number;
+    name: string ;
+    price: number;
+    description: string | undefined;
     children: ReactNode;
+    open?: boolean;
+    onClose?: () => void;
+    onConfirm?: () => void;
 };
 
-export function Create({ categories, children }: PageCreateProduct) {
-    const [isOpen, setIsOpen] = useState(false);
+export function Update({ 
+    id , 
+    name,
+    price,
+    description,
+    categories , 
+    open = false, 
+    onClose, 
+    onConfirm, 
+    children, 
+    ...props 
+    }: PageUpdateProduct) {
 
-    const { data, setData, post, errors, processing } = useForm({
-        name: "",
-        description: "",
-        price: 0,
-        cat_id: 0,
-    });
+    const [isOpen, setIsOpen] = useState(open);
+
+    useEffect(() => {
+        setIsOpen(open);
+    }, [open]);
+
+    const handleClose = () => {
+        setIsOpen(false);
+        if (onClose) onClose();
+    };
+
+    const { data, setData, put, errors, processing } = useForm({
+        name: name || '',
+        description: description || '',
+        price: price || '',
+        cat_id: null as number | null, 
+    });    
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        post("/product", {
+        put(`/product/${id}`, {
             data,
             onSuccess: () => {
                 setIsOpen(false);
-                toast("Product created successfully!", {
+                toast("Product updated successfully!", {
                 description: getDescription(),
                 action: {
                     label: "Undo",
@@ -62,15 +91,15 @@ export function Create({ categories, children }: PageCreateProduct) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Create Product</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details to create a new product.
-                    </DialogDescription>
-                </DialogHeader>
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+            <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Edit Product</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Fill in the details to edit product.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="grid items-center gap-2">
@@ -133,15 +162,16 @@ export function Create({ categories, children }: PageCreateProduct) {
                             )}
                         </div>
                     </div>
-                    <DialogFooter>
+                    <AlertDialogFooter>
                         {processing ? (
                             <LoadingButton variant="outline" />
                         ) : (
-                            <Button type="submit">Save</Button>
+                            <Button type="submit" className="bg-yellow-600 hover:bg-yellow-500">Edit</Button>
                         )}
-                    </DialogFooter>
+                        <AlertDialogCancel onClick={handleClose}>Cancel</AlertDialogCancel>
+                    </AlertDialogFooter>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </AlertDialogContent>
+        </AlertDialog>
     );
 }

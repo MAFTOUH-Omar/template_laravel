@@ -28,12 +28,12 @@ import {
     PaginationPrevious,
   } from "@/Components/ui/pagination"
 import InputSelect from "@/Components/ui/inputSelect";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import LoadingButton from "@/Components/ui/LoadingButton";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Create } from "@/Components/Dialog/Product/Create";
 import { Delete } from "@/Components/Dialog/Product/Delete";
-import { toast } from "sonner";
+import { Update } from "@/Components/Dialog/Product/Update";
 
 interface Category {
     id: number;
@@ -59,8 +59,6 @@ interface ProductsPageProps extends PageProps {
     };
 
     categories : Category[];
-
-    success : ReactNode
 }
 
 const Index = () => {
@@ -68,13 +66,18 @@ const Index = () => {
     const { 
         products,
         categories,
-        success 
     } = props;
 
     const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
     const [inputValue, setInputValue] = useState<string | undefined>(undefined);
+
     const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+    const [openUpdateDialog, setOpenUpdateDialog] = useState<boolean>(false);
+
     const [productId, setProductId] = useState<number>();
+    const [productName, setProductName] = useState<string>();
+    const [productPrice, setProductPrice] = useState<number>();
+    const [productDescription, setProductDescription] = useState<string>();
 
     const handleSelectChange = (newSelectedItem: string, newInputValue: string) => {
         setSelectedItem(newSelectedItem);
@@ -86,8 +89,28 @@ const Index = () => {
         setOpenDeleteDialog(true)
     }
 
+    const handleOpenUpdateDialog = (id: number, name: string, price: number, description: string) => {
+        setProductId(id);
+        setProductName(name);
+        setProductPrice(price);
+        setProductDescription(description);
+        setOpenUpdateDialog(true);
+    };  
+
     const handleCloseDeleteDialog = () => {
         setOpenDeleteDialog(false)
+    }
+
+    const handleCloseUpdateDialog = () => {
+        setOpenUpdateDialog(false);
+    };
+
+    const handleConfirDeleteDialog = () => {
+        handleCloseDeleteDialog()
+    }
+
+    const handleConfirUpdateDialog = () => {
+        handleCloseUpdateDialog()
     }
 
     const columns: ColumnDef<Product>[] = [
@@ -190,10 +213,10 @@ const Index = () => {
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => handleOpenDeleteDialog(row.original.id)}>
-                                <DeleteIcon />
-                                Delete
-                            </DropdownMenuItem>
-                        <DropdownMenuItem>
+                            <DeleteIcon />
+                            Delete
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={()=> handleOpenUpdateDialog(row.original.id , row.original.name , row.original.price , row.original.description)}>
                             <Edit/>
                             Edit
                         </DropdownMenuItem>
@@ -232,7 +255,6 @@ const Index = () => {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        {success && toast(success)}
 
                         <DataTable
                             columns={columns}
@@ -287,9 +309,21 @@ const Index = () => {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                        <Delete id={productId} open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+                        <Delete id={productId} open={openDeleteDialog} onClose={handleCloseDeleteDialog} onConfirm={handleConfirDeleteDialog}>
                             <span />
                         </Delete>
+                        <Update 
+                            id={typeof productId === 'number' ? productId : 0}
+                            name={productName ?? ''} 
+                            description={productDescription ?? ''} 
+                            price={productPrice ?? 0} 
+                            open={openUpdateDialog} 
+                            onClose={handleCloseUpdateDialog} 
+                            onConfirm={handleConfirUpdateDialog}
+                            categories={categories}
+                        >
+                            <span />
+                        </Update>
                     </div>
                 </div>
             </div>

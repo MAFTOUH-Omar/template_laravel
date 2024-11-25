@@ -102,8 +102,50 @@ class ProductController extends Controller
 
     public function update(Request $request, string $id)
     {
-        //
-    }
+        try {
+            $product = Products::findOrFail($id);
+    
+            $validatedData = $request->validate([
+                'name' => 'sometimes|nullable|string|max:255',
+                'description' => 'sometimes|nullable|string',
+                'price' => 'sometimes|nullable|numeric|min:0',
+                'cat_id' => 'sometimes|nullable|exists:categories,id',
+            ]);
+    
+            $dataToUpdate = [];
+            if ($request->filled('name')) {
+                $dataToUpdate['name'] = $request->input('name');
+            }
+            if ($request->filled('description')) {
+                $dataToUpdate['description'] = $request->input('description');
+            }
+            if ($request->filled('price')) {
+                $dataToUpdate['price'] = $request->input('price');
+            }
+            if ($request->filled('cat_id')) {
+                $dataToUpdate['cat_id'] = $request->input('cat_id');
+            }
+    
+            $product->update($dataToUpdate);
+    
+            return redirect()
+                ->route('product.index')
+                ->with('success', 'Product updated successfully!');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Product not found: ' . $e->getMessage()]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()
+                ->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Failed to update product. Please try again: ' . $e->getMessage()]);
+        }
+    }      
 
     public function destroy($id)
     {

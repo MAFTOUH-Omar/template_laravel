@@ -11,6 +11,8 @@ import {
 } from "@/Components/ui/alert-dialog"
 import { router } from "@inertiajs/react";
 import { ReactNode, useState, useEffect } from "react";
+import { toast } from "sonner";
+import { getDescription } from '@/helpers/helpers';
 
 type DeleteProduct = {
     id: number | undefined;
@@ -38,8 +40,13 @@ export function Delete({ id, children, open = false, onClose, onConfirm, ...prop
             router.delete(`/product/${id}`, {
                 onSuccess: () => {
                     setIsOpen(false);
-                    if (onConfirm) onConfirm();
-                },
+                    toast("Product deleted successfully!", {
+                    description: getDescription(),
+                    action: {
+                        label: "Undo",
+                        onClick: () => console.log("Undo"),
+                    }})
+                }
             });
         }
     };
@@ -58,7 +65,9 @@ export function Delete({ id, children, open = false, onClose, onConfirm, ...prop
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={handleClose}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSubmit} className="bg-red-600 hover:bg-red-500">Delete</AlertDialogAction>
+                    <form onSubmit={handleSubmit}>
+                        <AlertDialogAction type="submit" className="bg-red-600 hover:bg-red-500">Delete</AlertDialogAction>
+                    </form>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
