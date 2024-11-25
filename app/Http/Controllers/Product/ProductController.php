@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Products;
 use App\Models\Category_product;
+use App\Models\Categories;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -18,12 +19,12 @@ class ProductController extends Controller
     
         $user = auth()->user();
     
-        $forbiddenCategoryIds = $user->forbiddenCategories()->pluck('id')->toArray();
+        $forbiddenCategoryIds = $user->forbiddenCategories()->pluck('categories.id')->toArray();
     
         $query = Products::query()
-            ->with('category')
-            ->whereHas('category', function ($q) use ($forbiddenCategoryIds) {
-                $q->whereNotIn('id', $forbiddenCategoryIds);
+            ->with('categories')
+            ->whereHas('categories', function ($q) use ($forbiddenCategoryIds) {
+                $q->whereNotIn('categories.id', $forbiddenCategoryIds);
             })
             ->orderBy('id', 'desc');
     
@@ -32,7 +33,7 @@ class ProductController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', '%' . $search . '%')
                       ->orWhere('description', 'like', '%' . $search . '%')
-                      ->orWhereHas('category', function ($q) use ($search) {
+                      ->orWhereHas('categories', function ($q) use ($search) {
                           $q->where('name', 'like', '%' . $search . '%');
                       });
                 });
@@ -47,11 +48,11 @@ class ProductController extends Controller
         $prevPageUrl = $isSinglePage ? null : $products->previousPageUrl();
         $nextPageUrl = $isSinglePage ? null : $products->nextPageUrl();
     
-        $totalProduct = Products::whereHas('category', function ($q) use ($forbiddenCategoryIds) {
-            $q->whereNotIn('id', $forbiddenCategoryIds);
+        $totalProduct = Products::whereHas('categories', function ($q) use ($forbiddenCategoryIds) {
+            $q->whereNotIn('categories.id', $forbiddenCategoryIds);
         })->count();
-
-        $categories = Category::whereNotIn('id', $forbiddenCategoryIds)->get();
+    
+        $categories = Categories::whereNotIn('categories.id', $forbiddenCategoryIds)->get();
     
         return Inertia::render('Products/Index', [
             'products' => [
@@ -67,10 +68,26 @@ class ProductController extends Controller
         ]);
     }
     
-
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'cat_id' => 'required|exists:categories,id',
+        ]);
+    
+        try {
+            Products::create($validatedData);
+    
+            return redirect()
+                ->route('product.index')
+                ->with('success', 'Product created successfully!');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Failed to create product. Please try again.']);
+        }
     }
 
     public function show(string $id)
@@ -88,8 +105,20 @@ class ProductController extends Controller
         //
     }
 
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        try {
+            $product = Products::findOrFail($id);
+    
+            $product->delete();
+    
+            return redirect()
+                ->route('product.index')
+                ->with('success', 'Product deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Failed to delete product. Please try again.']);
+        }
+    }    
 }

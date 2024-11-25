@@ -48,6 +48,6 @@ class User extends Authenticatable
 
     public function forbiddenCategories()
     {
-        return $this->belongsToMany(Category::class, 'forbidden_categories', 'user_id', 'category_id');
+        return $this->belongsToMany(Categories::class, 'forbidden_categories', 'user_id', 'category_id');
     }    
 }

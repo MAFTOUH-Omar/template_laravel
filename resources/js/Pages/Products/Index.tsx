@@ -4,9 +4,8 @@ import { PageProps } from "@/types";
 import { useForm, usePage } from "@inertiajs/react";
 import { ColumnDef } from "@tanstack/react-table";
 import { 
-    Delete, 
+    DeleteIcon, 
     Edit, 
-    Fullscreen, 
     MoreHorizontal ,
     ArrowUpDown, 
     Plus,
@@ -17,7 +16,6 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu"
 import {
@@ -30,10 +28,12 @@ import {
     PaginationPrevious,
   } from "@/Components/ui/pagination"
 import InputSelect from "@/Components/ui/inputSelect";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import LoadingButton from "@/Components/ui/LoadingButton";
 import { Checkbox } from "@/Components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
+import { Create } from "@/Components/Dialog/Product/Create";
+import { Delete } from "@/Components/Dialog/Product/Delete";
+import { toast } from "sonner";
 
 interface Category {
     id: number;
@@ -45,7 +45,7 @@ interface Product {
     name: string;
     description: string;
     price: number;
-    category: Category;
+    category: Category[];
     totalProduct: number;
 }
 
@@ -58,26 +58,37 @@ interface ProductsPageProps extends PageProps {
         next_page_url ?: string | undefined;
     };
 
-    categories : {
-        id: number;
-        name: string;
-    }
+    categories : Category[];
+
+    success : ReactNode
 }
 
 const Index = () => {
     const { props } = usePage<ProductsPageProps>();
     const { 
         products,
-        categories
+        categories,
+        success 
     } = props;
 
     const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
     const [inputValue, setInputValue] = useState<string | undefined>(undefined);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+    const [productId, setProductId] = useState<number>();
 
     const handleSelectChange = (newSelectedItem: string, newInputValue: string) => {
         setSelectedItem(newSelectedItem);
         setInputValue(newInputValue);
     };
+
+    const handleOpenDeleteDialog = (id : number) => {
+        setProductId(id)
+        setOpenDeleteDialog(true)
+    }
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false)
+    }
 
     const columns: ColumnDef<Product>[] = [
         {
@@ -150,7 +161,7 @@ const Index = () => {
             },
         },
         {
-            accessorKey: "category.name",
+            accessorKey: "categories.name",
             header: ({ column }) => {
                 return (
                     <Button
@@ -178,17 +189,13 @@ const Index = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
-                            <Delete/>
-                            Delete
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenDeleteDialog(row.original.id)}>
+                                <DeleteIcon />
+                                Delete
+                            </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Edit/>
                             Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Fullscreen/>
-                            Preview
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                     </DropdownMenu>
@@ -197,12 +204,12 @@ const Index = () => {
         }
     ];
 
-    const { get, processing } = useForm({
+    const { get, data, setData ,processing } = useForm({
         search: inputValue ,
         filter : selectedItem
     });
 
-    const handleSubmit = (e : any) => {
+    const handleSubmit = (e : React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         get(route('product.index'), { preserveState: true });
     };
@@ -215,24 +222,18 @@ const Index = () => {
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
                         Products
                     </h2>
-                    <TooltipProvider delayDuration={0}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" aria-label="Add new item">
-                                <Plus size={16} strokeWidth={2} aria-hidden="true" />
-                            </Button>
-                            </TooltipTrigger>
-                            <TooltipContent className="border border-input bg-popover px-2 py-1 text-xs text-muted-foreground">
-                                New Product
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+
+                    <Create categories={categories}>
+                        <Button variant="outline"><Plus size={16} strokeWidth={2} aria-hidden="true" /></Button>
+                    </Create>
                 </div>
             }
         >
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                        {success && toast(success)}
+
                         <DataTable
                             columns={columns}
                             data={products.data}
@@ -286,7 +287,9 @@ const Index = () => {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-
+                        <Delete id={productId} open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+                            <span />
+                        </Delete>
                     </div>
                 </div>
             </div>
