@@ -59,11 +59,12 @@ export function Update({
     const [isOpen, setIsOpen] = useState(open);
 
     useEffect(() => {
-        setIsOpen(open);
-    }, [open]);
+        if (open !== isOpen) {
+            setIsOpen(open);
+        }
+    }, [open]); 
 
     const handleClose = () => {
-        setIsOpen(false);
         if (onClose) onClose();
     };
 
@@ -79,13 +80,13 @@ export function Update({
         put(`/product/${id}`, {
             data,
             onSuccess: () => {
-                setIsOpen(false);
                 toast("Product updated successfully!", {
                 description: getDescription(),
                 action: {
                     label: "Undo",
                     onClick: () => console.log("Undo"),
                 }})
+                handleClose();
             }
         });
     };

@@ -98,16 +98,16 @@ const Index = () => {
     };  
 
     const handleCloseDeleteDialog = () => {
-        setOpenDeleteDialog(false)
-    }
+        setOpenDeleteDialog(false);
+    };
 
     const handleCloseUpdateDialog = () => {
         setOpenUpdateDialog(false);
     };
-
+    
     const handleConfirDeleteDialog = () => {
-        handleCloseDeleteDialog()
-    }
+        handleCloseDeleteDialog();
+    };
 
     const handleConfirUpdateDialog = () => {
         handleCloseUpdateDialog()
@@ -309,7 +309,12 @@ const Index = () => {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                        <Delete id={productId} open={openDeleteDialog} onClose={handleCloseDeleteDialog} onConfirm={handleConfirDeleteDialog}>
+                        <Delete
+                            id={productId}
+                            open={openDeleteDialog}
+                            onClose={handleCloseDeleteDialog}
+                            onConfirm={handleConfirDeleteDialog}
+                        >
                             <span />
                         </Delete>
                         <Update 

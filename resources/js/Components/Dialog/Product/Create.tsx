@@ -24,6 +24,8 @@ import { ReactNode, useState } from "react";
 import LoadingButton from "@/Components/ui/LoadingButton";
 import { toast } from "sonner";
 import { getDescription } from '@/helpers/helpers';
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
 
 type Category = {
     id: number;
@@ -42,7 +44,7 @@ export function Create({ categories, children }: PageCreateProduct) {
         name: "",
         description: "",
         price: 0,
-        cat_id: 0,
+        cat_id: null as number | null,
     });
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -71,6 +73,17 @@ export function Create({ categories, children }: PageCreateProduct) {
                         Fill in the details to create a new product.
                     </DialogDescription>
                 </DialogHeader>
+
+                {Object.keys(errors).length > 0 && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        {Object.values(errors).map((error, index) => (
+                            <AlertDescription key={index}>{error}</AlertDescription>
+                        ))}
+                    </Alert>
+                )}
+
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="grid items-center gap-2">
@@ -81,9 +94,6 @@ export function Create({ categories, children }: PageCreateProduct) {
                                 value={data.name}
                                 onChange={(e) => setData("name", e.target.value)}
                             />
-                            {errors.name && (
-                                <p className="text-red-500 text-sm">{errors.name}</p>
-                            )}
                         </div>
                         <div className="grid items-center gap-2">
                             <Input
@@ -94,9 +104,6 @@ export function Create({ categories, children }: PageCreateProduct) {
                                 value={data.price}
                                 onChange={(e) => setData("price", parseInt(e.target.value))}
                             />
-                            {errors.price && (
-                                <p className="text-red-500 text-sm">{errors.price}</p>
-                            )}
                         </div>
                         <div className="grid items-center gap-2">
                             <Select
@@ -117,9 +124,6 @@ export function Create({ categories, children }: PageCreateProduct) {
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
-                            {errors.cat_id && (
-                                <p className="text-red-500 text-sm">{errors.cat_id}</p>
-                            )}
                         </div>
                         <div className="grid items-center justify-between gap-2">
                             <Textarea
@@ -128,9 +132,6 @@ export function Create({ categories, children }: PageCreateProduct) {
                                 value={data.description}
                                 onChange={(e) => setData("description", e.target.value)}
                             />
-                            {errors.description && (
-                                <p className="text-red-500 text-sm">{errors.description}</p>
-                            )}
                         </div>
                     </div>
                     <DialogFooter>
