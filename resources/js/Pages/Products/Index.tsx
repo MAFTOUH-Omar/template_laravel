@@ -28,12 +28,13 @@ import {
     PaginationPrevious,
   } from "@/Components/ui/pagination"
 import InputSelect from "@/Components/ui/inputSelect";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingButton from "@/Components/ui/LoadingButton";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Create } from "@/Components/Dialog/Product/Create";
 import { Delete } from "@/Components/Dialog/Product/Delete";
 import { Update } from "@/Components/Dialog/Product/Update";
+import { useTranslation } from "react-i18next";
 
 interface Category {
     id: number;
@@ -60,6 +61,7 @@ interface ProductsPageProps extends PageProps {
 
     categories : Category[];
     permissions: string[];
+    success: any;
 }
 
 const Index = () => {
@@ -67,6 +69,7 @@ const Index = () => {
     const { 
         products,
         categories,
+        success
     } = props;
 
     const userPermissions = props.permissions as string[];
@@ -85,6 +88,12 @@ const Index = () => {
     const [productName, setProductName] = useState<string>();
     const [productPrice, setProductPrice] = useState<number>();
     const [productDescription, setProductDescription] = useState<string>();
+
+    const { t, i18n } = useTranslation('product');
+
+    useEffect(() => {
+        i18n.loadNamespaces('product');
+    }, []);
 
     const handleSelectChange = (newSelectedItem: string, newInputValue: string) => {
         setSelectedItem(newSelectedItem);
@@ -255,7 +264,7 @@ const Index = () => {
             header={
                 <div className="flex justify-between items-center w-full">
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Products
+                        {t('title', { ns: 'product' })}
                     </h2>
 
                     {canCreateProduct && (
@@ -269,6 +278,7 @@ const Index = () => {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                        {success && (<p>{success}</p>)}
                         <DataTable
                             columns={columns}
                             data={products.data}

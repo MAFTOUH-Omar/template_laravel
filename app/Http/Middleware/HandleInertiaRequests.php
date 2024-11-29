@@ -22,12 +22,33 @@ class HandleInertiaRequests extends Middleware
         return parent::version($request);
     }
 
+    // public function share(Request $request): array
+    // {
+    //     $user = $request->user();
+
+    //     return [
+    //         ...parent::share($request),
+    //         'auth' => [
+    //             'user' => $user,
+    //         ],
+    //         'permissions' => $user ? $user->roles()
+    //             ->with('permissions')
+    //             ->get()
+    //             ->pluck('permissions')
+    //             ->flatten()
+    //             ->pluck('title')
+    //             ->unique()
+    //             ->all() : [],
+            
+    //     ];
+    // }
+
+
     public function share(Request $request): array
     {
         $user = $request->user();
 
-        return [
-            ...parent::share($request),
+        return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user,
             ],
@@ -39,6 +60,9 @@ class HandleInertiaRequests extends Middleware
                 ->pluck('title')
                 ->unique()
                 ->all() : [],
-        ];
+            'locale' => app()->getLocale(),
+            'success' => session('success'),
+            'error' => session('error'),
+        ]);
     }
 }

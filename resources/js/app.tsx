@@ -7,6 +7,23 @@ import { createRoot } from 'react-dom/client';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+import i18next from 'i18next';
+import { I18nextProvider } from 'react-i18next';
+import HttpApi from 'i18next-http-backend';
+
+i18next
+    .use(HttpApi)
+    .init({
+        interpolation: { escapeValue: false },
+        lng: "en",
+        fallbackLng: "en", 
+        backend: {
+            loadPath: '/lang/{{lng}}/{{ns}}.json',
+        },        
+        ns: ['global'],
+        defaultNS: 'global',
+    });
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
@@ -18,7 +35,9 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(
-            <App {...props} />
+            <I18nextProvider i18n={i18next} >
+                <App {...props} />
+            </I18nextProvider>
         );
     },
     progress: {

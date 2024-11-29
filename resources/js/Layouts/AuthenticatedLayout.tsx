@@ -4,7 +4,8 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Toaster } from '@/Components/ui/sonner';
 import { Link, usePage } from '@inertiajs/react';
-import { PropsWithChildren, ReactNode, useState } from 'react';
+import { PropsWithChildren, ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Authenticated({
     header,
@@ -14,6 +15,22 @@ export default function Authenticated({
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    // Translate part
+    const { t } = useTranslation("global");
+    const { i18n } = useTranslation();
+    const [lang, setLang] = useState<string>(localStorage.getItem('language') || 'en');
+
+    const changeLanguage = (newLang : string) => {
+        setLang(newLang);
+        i18n.changeLanguage(newLang);
+        localStorage.setItem('language', newLang);
+        window.location.href = `/change-language/${newLang}`;
+    };
+
+    useEffect(() => {
+        i18n.changeLanguage(lang);
+    }, [i18n, lang]);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -44,6 +61,13 @@ export default function Authenticated({
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
+
+                            <select onChange={(e) => changeLanguage(e.target.value)} defaultValue={i18n.language}>
+                                <option></option>
+                                <option value="en">English</option>
+                                <option value="fr">Français</option>
+                            </select>
+                            
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>

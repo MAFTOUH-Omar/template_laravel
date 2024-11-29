@@ -82,11 +82,11 @@ class ProductController extends Controller
     
             return redirect()
                 ->route('product.index')
-                ->with('success', 'Product created successfully!');
+                ->with(['success' => __('controllers/product.success.created')]);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->withErrors(['error' => 'Failed to create product. Please try again.']);
+                ->withErrors(['error' => __('controllers/product.error.cannot_create')]);
         }
     }
 
@@ -130,11 +130,11 @@ class ProductController extends Controller
     
             return redirect()
                 ->route('product.index')
-                ->with('success', 'Product updated successfully!');
+                ->with(['success' => __('controllers/product.success.updated')]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return redirect()
                 ->back()
-                ->withErrors(['error' => 'Product not found: ' . $e->getMessage()]);
+                ->withErrors(['error' => __('controllers/product.error.not_found') . $e->getMessage()]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()
                 ->back()
@@ -143,7 +143,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->withErrors(['error' => 'Failed to update product. Please try again: ' . $e->getMessage()]);
+                ->withErrors(['error' => __('controllers/product.error.cannot_update')]);
         }
     }      
 
@@ -156,11 +156,11 @@ class ProductController extends Controller
     
             return redirect()
                 ->route('product.index')
-                ->with('success', 'Product deleted successfully!');
+                ->with(['success' => __('controllers/product.success.deleted')]);
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->withErrors(['error' => 'Failed to delete product. Please try again.']);
+                ->withErrors(['error' => __('controllers/product.error.cannot_delete')]);
         }
     }    
 }

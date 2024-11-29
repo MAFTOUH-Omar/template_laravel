@@ -15,6 +15,11 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/change-language/{locale}', function ($locale) {
+    session(['locale' => $locale]);
+    return redirect()->back();
+})->name('change.language');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
