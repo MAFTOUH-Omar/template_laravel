@@ -11,26 +11,17 @@ class PermissionTableDataSeeder extends Seeder
     public function run(): void
     {
         DB::table('permissions')->insert([
-            # Product section
             [
-                "id" => 1,
-                "name" => "page_produit" ,
-                "description" => "page of products"
+                'id' => 1,
+                'title' => 'product_create',
             ],
             [
-                "id" => 2,
-                "name" => "list_produit" ,
-                "description" => "List of all products"
+                'id' => 2,
+                'title' => 'product_edit',
             ],
             [
-                "id" => 3,
-                "name" => "create_produit" ,
-                "description" => "create a product"
-            ],
-            [
-                "id" => 4,
-                "name" => "delete_produit" ,
-                "description" => "delete a product"
+                'id' => 3,
+                'title' => 'product_destroy',
             ],
         ]);
     }

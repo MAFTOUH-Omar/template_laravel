@@ -59,6 +59,7 @@ interface ProductsPageProps extends PageProps {
     };
 
     categories : Category[];
+    permissions: string[];
 }
 
 const Index = () => {
@@ -67,6 +68,12 @@ const Index = () => {
         products,
         categories,
     } = props;
+
+    const userPermissions = props.permissions as string[];
+
+    const canCreateProduct = userPermissions.includes("product_create");
+    const canEditProduct = userPermissions.includes("product_edit");
+    const canDeleteProduct = userPermissions.includes("product_destroy");
 
     const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
     const [inputValue, setInputValue] = useState<string | undefined>(undefined);
@@ -212,14 +219,20 @@ const Index = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleOpenDeleteDialog(row.original.id)}>
-                            <DeleteIcon />
-                            Delete
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={()=> handleOpenUpdateDialog(row.original.id , row.original.name , row.original.price , row.original.description)}>
-                            <Edit/>
-                            Edit
-                        </DropdownMenuItem>
+
+                        {canDeleteProduct && (
+                            <DropdownMenuItem onClick={() => handleOpenDeleteDialog(row.original.id)}>
+                                <DeleteIcon />
+                                Delete
+                            </DropdownMenuItem>
+                        )}
+
+                        {canEditProduct && (
+                            <DropdownMenuItem onClick={()=> handleOpenUpdateDialog(row.original.id , row.original.name , row.original.price , row.original.description)}>
+                                <Edit/>
+                                Edit
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -235,8 +248,7 @@ const Index = () => {
     const handleSubmit = (e : React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         get(route('product.index'), { preserveState: true });
-    };
-
+    }; 
 
     return (
         <AuthenticatedLayout
@@ -246,16 +258,17 @@ const Index = () => {
                         Products
                     </h2>
 
-                    <Create categories={categories}>
-                        <Button variant="outline"><Plus size={16} strokeWidth={2} aria-hidden="true" /></Button>
-                    </Create>
+                    {canCreateProduct && (
+                        <Create categories={categories}>
+                            <Button variant="outline"><Plus size={16} strokeWidth={2} aria-hidden="true" /></Button>
+                        </Create>
+                    )}
                 </div>
             }
         >
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-
                         <DataTable
                             columns={columns}
                             data={products.data}

@@ -22,18 +22,23 @@ class HandleInertiaRequests extends Middleware
         return parent::version($request);
     }
 
-    /**
-     * Define the props that are shared by default.
-     *
-     * @return array<string, mixed>
-     */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
+            'permissions' => $user ? $user->roles()
+                ->with('permissions')
+                ->get()
+                ->pluck('permissions')
+                ->flatten()
+                ->pluck('title')
+                ->unique()
+                ->all() : [],
         ];
     }
 }

@@ -12,14 +12,12 @@ class RoleTableDataSeeder extends Seeder
     {
         DB::table("roles")->insert([
             [
-                "id" => 1 ,
-                "name" => "Admin" ,
-                "description" => "Admin of panel",
+                'id' => 1,
+                'title' => 'Admin',
             ],
             [
-                "id" => 2 ,
-                "name" => "Moderator" ,
-                "description" => "Moderator of panel",
+                'id' => 2,
+                'title' => 'User',
             ],
         ]);
     }
